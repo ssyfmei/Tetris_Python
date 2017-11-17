@@ -4,7 +4,7 @@ Created on Fri Nov 17 02:40:11 2017
 
 @author: meixx115
 """
-import sys
+from tetris_utils import *
 
 def runTetris:
     game = Tetris()
