@@ -12,26 +12,42 @@ class Piece:
         
         
 class Board:
-    def __init__(self,game)
-    
+    def __init__(self, game):
+        self.grid = self.
+        
     
     def draw:
+        
+        
+        
+        
+        
+        
+        
         
         
     
 class Tetris:
     def __init__(self):
         self.root = tk.Tk()
+        set_background()
         
-        set_board
+        set_board()
         self.running = True
         key_bindings
         buttons
         run_game
     
-    
+    def set_background(self):
+        self.root.title("Tetris")
+        back = tk.Frame(self.root, width=205, height=605, bg='lightblue')
+        back.pack()
     
     def setboard(self):
+        
+        self.root = tk.Tk()
+        
+         
         self.canvas = Canvas(root, 400, 200)
         self.board  = TetrisBoard(self)
         self.canvas.place(width=self.board.block_size * self.board.num_rows + 3,
@@ -66,6 +82,17 @@ class Tetris:
         
         label = tk.Label(self.root, text="Current Score:", bg = 'lightblue')
         label.place(x=75, y=68, anchor="c")
+        
+    def draw_piece(piece, old = False):
+        if old and piece.moved:
+        end
+        
+        size = self.board.block_size
+        blocks = piece.current_rotation
+        start = piece.position
+        
+            
+            
         
         
         
