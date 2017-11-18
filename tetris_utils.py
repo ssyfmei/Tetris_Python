@@ -27,7 +27,7 @@ class Piece:
                self.rotations([[0, 0], [1, 0], [0, -1], [-1, -1]])] # Z        
         
     def current_rotation(self):
-        return self.all_rotations(self.rotation_index)
+        return self.all_rotations[self.rotation_index]
     def moved(self):
         return self.moved
     def position(self):
@@ -64,7 +64,8 @@ class Piece:
 class Board:
     def __init__(self, game):
         self.grid = [[None] * self.num_rows()] * self.num_columns()
-        self.current_block = Piece.next_piece(self)
+        self.current_block = Piece([None],None).next_piece(self)
+        self.current_pos = None
         self.score = 0
         self.game = game
         self.delay = 500
@@ -147,10 +148,10 @@ class Board:
     
     def remove_filled(self):
         for num in range(2, len(self.grid)):
-            row = self.grid[num]
+            #row = self.grid[num]
             if len(list(filter(lambda x: x is None, self.grid[num]))) == 0:
-                for item in self.grid[num]:
-                    item = None
+                #for item in self.grid[num]:
+                #    item = None
                 # move rows down
                 for num2 in range(len(self.grid) - num + 1, len(self.grid) + 1):
                     self.grid[len(self.grid) - num2 + 1] = numpy.array(self.grid[len(self.grid) - num2 ])
@@ -159,13 +160,14 @@ class Board:
                 # add score 
                 self.score += 10
     def draw(self):
-        self.current_pos = self.game.draw_piece(self.current_block, self.current_pos)
+        self.current_pos = self.game.draw_piece(self.current_block, self.current_pos) 
     
     
     
 class Tetris:
     def __init__(self):
         self.root = tk.Tk()
+        self.root.title("Tetris")
         self.set_background()
         self.set_board()
         self.running = True
@@ -174,16 +176,14 @@ class Tetris:
         self.run_game()
     
     def set_background(self):
-        self.root = tk.Tk()
-        self.root.title("Tetris")
         back = tk.Frame(self.root, width=205, height=605, bg='lightblue')
         back.pack()
     
     def set_board(self):
         self.canvas = tk.Canvas(self.root, width=200, height=400)
         self.board  = Board(self)
-        self.canvas.place(width=self.board.block_size * self.board.num_rows + 3,
-                          height=self.board.block_size * self.board.num_columns + 6, anchor="c")
+        self.canvas.place(width= self.board.block_size() * self.board.num_rows() + 3,
+                          height=self.board.block_size() * self.board.num_columns() + 6, anchor="c")
         self.board.draw()
     
     def key_bindings(self):
@@ -202,7 +202,7 @@ class Tetris:
         self.root.bind('w', self.board.rotate_counter_clockwise)
         self.root.bind('<Up>', self.board.rotate_counter_clockwise)
         
-        self.root.bind('space', self.board.drop_call_the_way)
+        self.root.bind('space', self.board.drop_all_the_way)
         
     def buttons(self):
         new_game = tk.Button(self.root, text='new game', width=9, height = 2,bg = 'lightcoral',   command=self.root.destroy)
@@ -227,8 +227,8 @@ class Tetris:
         label.place(x=75, y=68, anchor="c")
         
         self.score = tk.Label(self.root, height = 35, width = 50, bg = 'lightblue')
-        self.score.text(self.board.score)
-        self.score.place(126, 45, anchor = "c")
+        self.score['text'] = (self.board.score)
+        self.score.place(x=126, y=45, anchor = "c")
         
     def new_game(self, event = None):
         self.canvas.delete("all")
@@ -272,12 +272,12 @@ class Tetris:
             self.canvas.create_rectangle(start[0]*size + block[0]*size + 3, 
                        start[1]*size + block[1]*size,
                        start[0]*size + size + block[0]*size + 3, 
-                       start[1]*size + size + block[1]*size, bg = piece.color)
+                       start[1]*size + size + block[1]*size, fill = piece.color)
         
     def exitProgram(self, event=None):
         self.root.destroy()
             
         
 game = Tetris()
-game.root.mainLoop()        
+game.root.mainloop()        
         
