@@ -16,13 +16,54 @@ class Board:
         self.grid = self.
         
     
+    def block_size(self):
+        return 15
+    def num_colums(self):
+        return 10
+    def num_rows(self):
+        return 27
+    def score(self):
+        return self.score
+        
+    def delay(self):
+        return self.delay
+    
+    def game_over?(self):
+        ###return self.grid[1]
+        
+        ###
+        
+    # Manipulate Blocks
+    def run(self):
+        
+    def move_left(self):
+        pass
+    def move_right(self):
+        pass
+    def rotate_clockwise(self):
+        pass
+    def rotate_counter_clockwise(self):
+        pass
+    
+    def drop_call_the_way(self):
+        pass
+    
+    
+    def next_piece(self):
+        pass
+    
+    def store_current(self):
+        pass
+    
+    def empty_at(point):
+        pass
+    
+    def remove_filled(self):
+        pass
+    
     def draw:
-        
-        
-        
-        
-        
-        
+        pass
+    
         
         
         
@@ -31,31 +72,27 @@ class Tetris:
     def __init__(self):
         self.root = tk.Tk()
         set_background()
-        
         set_board()
         self.running = True
-        key_bindings
-        buttons
-        run_game
+        key_bindings()
+        buttons()
+        run_game()
     
     def set_background(self):
+        self.root = tk.Tk()
         self.root.title("Tetris")
         back = tk.Frame(self.root, width=205, height=605, bg='lightblue')
         back.pack()
     
     def setboard(self):
-        
-        self.root = tk.Tk()
-        
-         
-        self.canvas = Canvas(root, 400, 200)
-        self.board  = TetrisBoard(self)
+        self.canvas = Canvas(root, width=200, height=400)
         self.canvas.place(width=self.board.block_size * self.board.num_rows + 3,
-                          height=self.board.block_size * self.board.num_columns + 6)
+                          height=self.board.block_size * self.board.num_columns + 6, anchor=CENTER)
+        self.board  = Board(self)
         self.board.draw()
     
     def key_bindings(self):
-        self.root.bind()
+        self.root.bind('n', )
         self.root.bind()
         self.root.bind()
         self.root.bind()
@@ -83,6 +120,13 @@ class Tetris:
         label = tk.Label(self.root, text="Current Score:", bg = 'lightblue')
         label.place(x=75, y=68, anchor="c")
         
+        
+    def new_game(self):
+        pass
+    
+    def update_score(self):
+        pass
+    
     def draw_piece(piece, old = False):
         if old and piece.moved:
         end
