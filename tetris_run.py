@@ -6,8 +6,8 @@ Created on Fri Nov 17 02:40:11 2017
 """
 from tetris_utils import *
 
-def runTetris:
+def runTetris():
     game = Tetris()
-    mainLoop()
+    game.root.mainLoop()
     
 runTetris()
