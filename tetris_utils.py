@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 17 02:46:45 2017
 
-@author: meixx115
-"""
 import tkinter as tk
 import random
 import numpy
@@ -28,14 +23,13 @@ class Piece:
         
     def current_rotation(self):
         return self.all_rotations[self.rotation_index]
-    def moved(self):
-        return self.moved
     def position(self):
         return self.base_position
     def color(self):
         return self.color
     def drop_by_one(self):
         self.moved = self.move(0, 1, 0)
+        return self.moved
         
     def move(self, delta_x, delta_y, delta_rotation):
         moved = True
@@ -64,8 +58,8 @@ class Piece:
 class Board:
     def __init__(self, game):
         self.grid = [[None] * self.num_rows()] * self.num_columns()
-        self.current_block = Piece([None],None).next_piece(self)
-        self.current_pos = None
+        self.current_block = Piece([123],112).next_piece(self)
+        self.current_pos = self.current_block.base_position
         self.score = 0
         self.game = game
         self.delay = 500
@@ -131,7 +125,7 @@ class Board:
         self.location = self.current_block.current_rotation()
         displacement = self.current_block.position()
         for index in range(4):
-            current = self.locations[index]
+            current = self.location[index]
             self.grid[current[1]+displacement[1]][current[0]+displacement[0]] = self.current_pos[index]
         self.remove_filled()
         self.delay = max(self.delay - 2, 80)
@@ -180,10 +174,13 @@ class Tetris:
         back.pack()
     
     def set_board(self):
-        self.canvas = tk.Canvas(self.root, width=200, height=400)
         self.board  = Board(self)
-        self.canvas.place(width= self.board.block_size() * self.board.num_rows() + 3,
-                          height=self.board.block_size() * self.board.num_columns() + 6, anchor="c")
+        #self.canvas = tk.Canvas(self.root, width= self.board.block_size() * self.board.num_rows() + 3, 
+                                #height=self.board.block_size() * self.board.num_columns() + 6)
+        
+        #self.canvas.place(x=24,y=80, anchor="c")
+        self.canvas = tk.Canvas(self.root, height=360, width=180)
+        self.canvas.place(x=10,y=100)
         self.board.draw()
     
     def key_bindings(self):
@@ -226,9 +223,9 @@ class Tetris:
         label = tk.Label(self.root, text="Current Score:", bg = 'lightblue')
         label.place(x=75, y=68, anchor="c")
         
-        self.score = tk.Label(self.root, height = 35, width = 50, bg = 'lightblue')
+        self.score = tk.Label(self.root, bg = 'lightblue')
         self.score['text'] = (self.board.score)
-        self.score.place(x=126, y=45, anchor = "c")
+        self.score.place(x = 140, y = 68, anchor = "c")
         
     def new_game(self, event = None):
         self.canvas.delete("all")
@@ -249,31 +246,30 @@ class Tetris:
             
     
     def update_score(self):
-        self.score.text(self.board.score)
+        self.score['text'] = self.board.score
     
     def run_game(self):
-        pass
-        #if (not self.board.game_over()) and self.running
-        ## timmer
-        ## timmer
-    
+        self.board.run()
+        self.root.after(500, self.run_game)
+        
     def is_running(self):
         return self.running
         
     # take a piece and old block list
     def draw_piece(self, piece, old = None):
-        if old is not None and piece.moved():
+        if old is not None and piece.moved:
             for block in old:
-                block = None
+                self.canvas.delete(block) 
         size = self.board.block_size()
         blocks = piece.current_rotation()
         start = piece.position()
+        new_piece = []
         for block in blocks:
-            self.canvas.create_rectangle(start[0]*size + block[0]*size + 3, 
+            new_piece.append(self.canvas.create_rectangle(start[0]*size + block[0]*size + 3, 
                        start[1]*size + block[1]*size,
                        start[0]*size + size + block[0]*size + 3, 
-                       start[1]*size + size + block[1]*size, fill = piece.color)
-        
+                       start[1]*size + size + block[1]*size, fill = piece.color))
+        return new_piece
     def exitProgram(self, event=None):
         self.root.destroy()
             
