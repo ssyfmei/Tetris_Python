@@ -37,7 +37,7 @@ class Piece:
         for posns in potential:
             if not (self.board.empty_at([posns[0] + delta_x + self.base_position[0],
                                          posns[1] + delta_y + self.base_position[1]])):
-                return False
+                   return False
         if moved:
             self.base_position[0] += delta_x
             self.base_position[1] += delta_y
@@ -57,9 +57,9 @@ class Piece:
         
 class Board:
     def __init__(self, game):
-        self.grid = [[None] * self.num_columns()] * self.num_rows()
+        self.grid = numpy.array([[None for x in range(self.num_columns())] for y in range(self.num_rows())])
         self.current_block = Piece([123],112).next_piece(self)
-        self.current_pos = self.current_block.base_position
+        self.current_pos = None
         self.score = 0
         self.game = game
         self.delay = 500
@@ -111,21 +111,31 @@ class Board:
     
     def drop_all_the_way(self, event = None):
         if game.is_running():
-            self.current_block.move(-1,0,0)
+            ran = self.current_block.drop_by_one()
+            for item in self.current_pos:
+                game.canvas.delete(item)
+            while ran:
+                self.score += 1
+                ran = self.current_block.drop_by_one()
+            self.draw()
+            self.store_current()
+            
+        if not self.game_over():
+            self.next_piece()
+        self.game.update_score()
         self.draw()
         
     def next_piece(self):
         self.current_block = Piece([123],112).next_piece(self)
-        self.current_pos   = self.current_block.base_position
+        self.current_pos   = None #self.current_block.base_position
     
     def store_current(self):
         self.location = self.current_block.current_rotation()
         displacement = self.current_block.position()
         for index in range(4):
             current = self.location[index]
-            print(self.grid)
-            self.grid[current[1]+displacement[1]][current[0]+displacement[0]] = 1#self.current_pos[index]
-        #self.remove_filled()
+            self.grid[current[1]+displacement[1]][current[0]+displacement[0]] = self.current_pos[index]
+        self.remove_filled()
         self.delay = max(self.delay - 2, 80)
         
     
@@ -140,12 +150,15 @@ class Board:
     
     def remove_filled(self):
         for num in range(2, len(self.grid)):
-            #row = self.grid[num]
-            if len(list(filter(lambda x: x is None, self.grid[num]))) == 0:
-                #for item in self.grid[num]:
-                #    item = None
+            if len(list(filter(lambda x: x is None , self.grid[num]))) == 0:
+                for index in range(self.num_columns()):
+                    self.game.canvas.delete(self.grid[num][index])
+                    self.grid[num][index] = None
                 # move rows down
                 for num2 in range(len(self.grid) - num + 1, len(self.grid) + 1):
+                    for col in self.grid[len(self.grid) - num2]:
+                        if col is not None:
+                            self.game.canvas.move(col, 0, self.block_size())                    
                     self.grid[len(self.grid) - num2 + 1] = numpy.array(self.grid[len(self.grid) - num2 ])
                 #insert new blank row at top
                 self.grid[0] = numpy.array([None]* self.num_columns())
@@ -168,17 +181,14 @@ class Tetris:
         self.run_game()
     
     def set_background(self):
-        back = tk.Frame(self.root, width=205, height=605, bg='lightblue')
+        back = tk.Frame(self.root, width=205, height=655, bg='lightblue')
         back.pack()
     
     def set_board(self):
         self.board  = Board(self)
-        #self.canvas = tk.Canvas(self.root, width= self.board.block_size() * self.board.num_rows() + 3, 
-                                #height=self.board.block_size() * self.board.num_columns() + 6)
-        
-        #self.canvas.place(x=24,y=80, anchor="c")
-        self.canvas = tk.Canvas(self.root, height=500, width=180)
-        self.canvas.place(x=10,y=100)
+        self.canvas = tk.Canvas(self.root, width=self.board.block_size() * self.board.num_columns() + 6,
+                                height=self.board.block_size() * self.board.num_rows() + 3)
+        self.canvas.place(x=25,y=80)
         self.board.draw()
     
     def key_bindings(self):
@@ -197,26 +207,26 @@ class Tetris:
         self.root.bind('w', self.board.rotate_counter_clockwise)
         self.root.bind('<Up>', self.board.rotate_counter_clockwise)
         
-        self.root.bind('space', self.board.drop_all_the_way)
+        self.root.bind('<space>', self.board.drop_all_the_way)
         
     def buttons(self):
-        new_game = tk.Button(self.root, text='new game', width=9, height = 2,bg = 'lightcoral',   command=self.root.destroy)
-        pause = tk.Button(self.root, text='pause',    width=6, height = 2,   bg = 'lightcoral',   command=self.root.destroy)
-        quit1 = tk.Button(self.root, text='quit',     width=5, height = 2,   bg = 'lightcoral',   command=self.root.destroy)   
-        move_left =tk.Button(self.root, text='left', width=6, height = 2,    bg = 'lightgreen',   command=self.root.destroy)
-        move_right =tk.Button(self.root, text='right', width=6, height = 2,  bg = 'lightgreen',   command=self.root.destroy)
-        rotate_clock =tk.Button(self.root, text='^_)', width=6, height = 2,  bg = 'lightgreen',   command=self.root.destroy)
-        rotate_counter =tk.Button(self.root, text='(_^', width=6, height = 2,bg = 'lightgreen',   command=self.root.destroy)
-        drop = tk.Button(self.root, text='drop', width=6, height = 2,        bg = 'lightgreen',   command=self.root.destroy)
+        new_game = tk.Button(self.root, text='new game', width=9, height = 2,bg = 'lightcoral',   command=self.new_game)
+        pause = tk.Button(self.root, text='pause',    width=6, height = 2,   bg = 'lightcoral',   command=self.pause)
+        quit1 = tk.Button(self.root, text='quit',     width=5, height = 2,   bg = 'lightcoral',   command=self.exitProgram)   
+        move_left =tk.Button(self.root, text='left', width=6, height = 2,    bg = 'lightgreen',   command=self.board.move_left)
+        move_right =tk.Button(self.root, text='right', width=6, height = 2,  bg = 'lightgreen',   command=self.board.move_right)
+        rotate_clock =tk.Button(self.root, text='^_)', width=6, height = 2,  bg = 'lightgreen',   command=self.board.rotate_clockwise)
+        rotate_counter =tk.Button(self.root, text='(_^', width=6, height = 2,bg = 'lightgreen',   command=self.board.rotate_counter_clockwise)
+        drop = tk.Button(self.root, text='drop', width=6, height = 2,        bg = 'lightgreen',   command=self.board.drop_all_the_way)
 
         new_game.place(x=52, y=28, anchor="c")
         pause.place(x=115, y=28, anchor="c")
         quit1.place(x=163, y=28, anchor="c")
-        rotate_counter.place(x=100, y=499, anchor="c")
-        rotate_clock.place(x=100, y=581, anchor="c")
-        move_left.place(x=48, y=540, anchor="c")
-        move_right.place(x=152, y=540, anchor="c")
-        drop.place(x=100, y=540, anchor="c")
+        rotate_counter.place(x=100, y=499+30, anchor="c")
+        rotate_clock.place(x=100, y=581+30, anchor="c")
+        move_left.place(x=48, y=540+30, anchor="c")
+        move_right.place(x=152, y=540+30, anchor="c")
+        drop.place(x=100, y=540+30, anchor="c")
         
         label = tk.Label(self.root, text="Current Score:", bg = 'lightblue')
         label.place(x=75, y=68, anchor="c")
@@ -234,14 +244,10 @@ class Tetris:
         
     def pause(self, event = None):
         if self.running:
-            self.running = False
-            ####
-            # Timer
-            ####
+            self.running = False         
         else:
             self.running = True
             self.run_game()
-            
     
     def update_score(self):
         self.score['text'] = self.board.score
