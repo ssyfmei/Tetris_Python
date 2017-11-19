@@ -32,17 +32,20 @@ class Piece:
         return self.moved
         
     def move(self, delta_x, delta_y, delta_rotation):
-        moved = True
-        potential = self.all_rotations[(self.rotation_index + delta_rotation) % len(self.all_rotations)]
-        for posns in potential:
-            if not (self.board.empty_at([posns[0] + delta_x + self.base_position[0],
-                                         posns[1] + delta_y + self.base_position[1]])):
-                   return False
-        if moved:
-            self.base_position[0] += delta_x
-            self.base_position[1] += delta_y
-            self.rotation_index = (self.rotation_index + delta_rotation) % len(self.all_rotations)
-        return moved
+        if self.board.game.is_running():
+            moved = True
+            potential = self.all_rotations[(self.rotation_index + delta_rotation) % len(self.all_rotations)]
+            for posns in potential:
+                if not (self.board.empty_at([posns[0] + delta_x + self.base_position[0],
+                                             posns[1] + delta_y + self.base_position[1]])):
+                       return False
+            if moved:
+                self.base_position[0] += delta_x
+                self.base_position[1] += delta_y
+                self.rotation_index = (self.rotation_index + delta_rotation) % len(self.all_rotations)
+            return moved
+        else:
+            return False
     
     def rotations(self, point_array):
         rotate1 = list(map(lambda x: [-x[1], x[0]], point_array))
@@ -83,47 +86,48 @@ class Board:
         
     # Manipulate Blocks
     def run(self):
-       ran = self.current_block.drop_by_one()
-       if not ran:
-           self.store_current()
-           if (not self.game_over()):
-               self.next_piece()
-       self.game.update_score()
-       self.draw()
+        if self.game.is_running():
+           ran = self.current_block.drop_by_one()
+           if not ran:
+               self.store_current()
+               if (not self.game_over()):
+                   self.next_piece()
+           self.game.update_score()
+           self.draw()
            
         
     def move_left(self, event = None):
-        if (not self.game_over()) and game.is_running():
+        if (not self.game_over()) and self.game.is_running():
             self.current_block.move(-1,0,0)
         self.draw()
     def move_right(self, event = None):
-        if (not self.game_over()) and game.is_running():
+        if (not self.game_over()) and self.game.is_running():
             self.current_block.move(1,0,0)
         self.draw()
     def rotate_clockwise(self, event = None):
-        if (not self.game_over()) and game.is_running():
+        if (not self.game_over()) and self.game.is_running():
             self.current_block.move(0,0,1)
         self.draw()
     def rotate_counter_clockwise(self, event = None):
-        if (not self.game_over()) and game.is_running():
+        if (not self.game_over()) and self.game.is_running():
             self.current_block.move(0,0,-1)
         self.draw()
     
     def drop_all_the_way(self, event = None):
-        if game.is_running():
+        if self.game.is_running():
             ran = self.current_block.drop_by_one()
             for item in self.current_pos:
-                game.canvas.delete(item)
+                self.game.canvas.delete(item)
             while ran:
                 self.score += 1
                 ran = self.current_block.drop_by_one()
             self.draw()
             self.store_current()
             
-        if not self.game_over():
-            self.next_piece()
-        self.game.update_score()
-        self.draw()
+            if not self.game_over():
+                self.next_piece()
+            self.game.update_score()
+            self.draw()
         
     def next_piece(self):
         self.current_block = Piece([123],112).next_piece(self)
@@ -136,7 +140,7 @@ class Board:
             current = self.location[index]
             self.grid[current[1]+displacement[1]][current[0]+displacement[0]] = self.current_pos[index]
         self.remove_filled()
-        self.delay = max(self.delay - 2, 80)
+        self.delay = max(self.delay - 2, 200)
         
     
     def empty_at(self, point):
@@ -238,7 +242,9 @@ class Tetris:
     def new_game(self, event = None):
         self.canvas.delete("all")
         self.set_board()
-        self.score.text(self.board.score)
+        self.key_bindings()
+        self.buttons()
+        self.score['text'] = (self.board.score)
         self.running = True
         self.run_game()
         
@@ -276,8 +282,4 @@ class Tetris:
         return new_piece
     def exitProgram(self, event=None):
         self.root.destroy()
-            
-        
-game = Tetris()
-game.root.mainloop()        
         

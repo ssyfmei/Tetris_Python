@@ -4,10 +4,10 @@ Created on Fri Nov 17 02:40:11 2017
 
 @author: meixx115
 """
-from tetris_utils import *
+import tetris_utils
 
 def runTetris():
-    game = Tetris()
-    game.root.mainLoop()
+    mygame = tetris_utils.Tetris()
+    mygame.root.mainloop()
     
 runTetris()
