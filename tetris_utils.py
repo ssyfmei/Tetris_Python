@@ -57,7 +57,7 @@ class Piece:
         
 class Board:
     def __init__(self, game):
-        self.grid = [[None] * self.num_rows()] * self.num_columns()
+        self.grid = [[None] * self.num_columns()] * self.num_rows()
         self.current_block = Piece([123],112).next_piece(self)
         self.current_pos = self.current_block.base_position
         self.score = 0
@@ -79,6 +79,7 @@ class Board:
         return self.delay
     
     def game_over(self):
+        print(list(filter(lambda x: x is None, self.grid[1])))
         return len(list(filter(lambda x: x is None, self.grid[1]))) > 0
         
     # Manipulate Blocks
@@ -138,6 +139,7 @@ class Board:
             return True
         elif point[1] >= self.num_rows():
             return False
+        print(point[1])
         return self.grid[point[1]][point[0]] is None
     
     def remove_filled(self):
@@ -179,7 +181,7 @@ class Tetris:
                                 #height=self.board.block_size() * self.board.num_columns() + 6)
         
         #self.canvas.place(x=24,y=80, anchor="c")
-        self.canvas = tk.Canvas(self.root, height=360, width=180)
+        self.canvas = tk.Canvas(self.root, height=500, width=180)
         self.canvas.place(x=10,y=100)
         self.board.draw()
     
@@ -250,7 +252,7 @@ class Tetris:
     
     def run_game(self):
         self.board.run()
-        self.root.after(500, self.run_game)
+        self.root.after(100, self.run_game)
         
     def is_running(self):
         return self.running
